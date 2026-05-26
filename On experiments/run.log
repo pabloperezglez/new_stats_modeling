@@ -1,0 +1,252 @@
+[CLEAN RUN start 20:19:44] all fits reused from cache; end-to-end, bug-free
+
+==============================================================================
+## 00_setup :: load analytic dataset (READ-ONLY) and derive responses
+==============================================================================
+Loaded /Users/pabloperezgonzalez/Downloads/Statistical Modeling Project/On Data/Data/analytic_dataset_built.rds 
+raw dim: 461448 rows x 27 cols 
+
+Observation summary 
+  rows (hex-months)        : 461,448 
+  unique hexes             : 6,409 
+  unique months (dates)    : 72 
+  time span                : 2015-01-01 .. 2020-12-01 
+  time_index range         : 1 .. 72 
+  nOprD_CO  zero-proportion : 0.4331   mean 10.52   var/mean 107.0   max 807 
+  nMMSI_CO  zero-proportion : 0.4331   mean 8.22   var/mean 87.8   max 509 
+  post2017 table           : pre=153816 post=307632 
+
+==============================================================================
+## 00_setup :: session info
+==============================================================================
+R           : R version 4.5.3 (2026-03-11) 
+platform    : aarch64-apple-darwin20 
+mgcv        : 1.9.4 
+DHARMa      : 0.4.7 
+gratia      : 0.11.2 
+ape         : 5.8.1 
+nthreads    : 10 
+twlss avail : TRUE 
+ziplss avail: TRUE 
+00_setup ready.
+ 
+Initialised fresh: experiments.csv, experiments_terms.csv, experiments_interpretation.md 
+
+==============================================================================
+## 01_buildup_tweedie :: Tweedie build-up on nOprD_CO (engine = bam / fREML)
+==============================================================================
+
+>>> M0a_spatial_re :  nOprD_CO ~ s(month, bs = "cc", k = 12) + s(time_index, bs = "ps", m = c(2, 2), k = 10) + s(hexID, bs = "re") 
+  [reusing cached fit: /Users/pabloperezgonzalez/Downloads/Statistical Modeling Project/On experiments/models/M0a_spatial_re.rds] 
+  [M0a_spatial_re] AIC=2033024 BIC=2103059 dev.expl=79.7% edf=6340.0 score(fREML)=1029983 conc=NA | disp.p=0 zero.p=0 moranI=0.169(p=0) box.p=0 
+
+>>> M0b_spatial_te :  nOprD_CO ~ s(month, bs = "cc", k = 12) + s(time_index, bs = "ps", m = c(2, 2), k = 10) + te(centroid_x, centroid_y, bs = "ps", k = c(20, 20)) 
+  [reusing cached fit: /Users/pabloperezgonzalez/Downloads/Statistical Modeling Project/On experiments/models/M0b_spatial_te.rds] 
+  [M0b_spatial_te] AIC=2254839 BIC=2258524 dev.expl=61.4% edf=330.2 score(fREML)=1129648 conc=1.000 | disp.p=0 zero.p=0 moranI=0.014(p=0) box.p=0 
+
+==============================================================================
+## SPATIAL BAKE-OFF -- decision
+==============================================================================
+FROZEN spatial term -> te(centroid_x,centroid_y) : te(centroid_x, centroid_y, bs = "ps", k = c(20, 20)) 
+RE  : AIC=2033024 BIC=2103059 fREML=1029983 dev.expl=79.7% edf=6340 MoranI.p=0 
+te  : AIC=2254839 BIC=2258524 fREML=1129648 dev.expl=61.4% edf=330 MoranI.p=0 
+WINNER (frozen): te(centroid_x,centroid_y) 
+
+>>> M1_ice :  nOprD_CO ~ s(month, bs = "cc", k = 12) + s(time_index, bs = "ps", m = c(2, 2), k = 10) + te(centroid_x, centroid_y, bs = "ps", k = c(20, 20)) + s(ice_conc, bs = "ps", m = c(2, 2), k = 20) 
+  [reusing cached fit: /Users/pabloperezgonzalez/Downloads/Statistical Modeling Project/On experiments/models/M1_ice.rds] 
+  [M1_ice] AIC=2205035 BIC=2208935 dev.expl=65.7% edf=349.7 score(fREML)=1104834 conc=1.000 | disp.p=0 zero.p=0 moranI=0.008(p=0) box.p=1.39e-06 
+
+==============================================================================
+## TEMPERATURE comparison :: raw air_temp vs orthogonalised air_temp_resid
+==============================================================================
+
+>>> M2a_air_temp :  nOprD_CO ~ s(month, bs = "cc", k = 12) + s(time_index, bs = "ps", m = c(2, 2), k = 10) + te(centroid_x, centroid_y, bs = "ps", k = c(20, 20)) + s(ice_conc, bs = "ps", m = c(2, 2), k = 20) + s(air_temp, bs = "ps", m = c(2, 2), k = 20) 
+  [reusing cached fit: /Users/pabloperezgonzalez/Downloads/Statistical Modeling Project/On experiments/models/M2a_air_temp.rds] 
+  [M2a_air_temp] AIC=2198107 BIC=2202180 dev.expl=66.3% edf=365.0 score(fREML)=1101408 conc=1.000 | disp.p=0 zero.p=0 moranI=0.008(p=0) box.p=1.15e-05 
+
+>>> M2b_air_temp_resid :  nOprD_CO ~ s(month, bs = "cc", k = 12) + s(time_index, bs = "ps", m = c(2, 2), k = 10) + te(centroid_x, centroid_y, bs = "ps", k = c(20, 20)) + s(ice_conc, bs = "ps", m = c(2, 2), k = 20) + s(air_temp_resid, bs = "ps", m = c(2, 2), k = 20) 
+  [reusing cached fit: /Users/pabloperezgonzalez/Downloads/Statistical Modeling Project/On experiments/models/M2b_air_temp_resid.rds] 
+  [M2b_air_temp_resid] AIC=2198874 BIC=2202940 dev.expl=66.2% edf=364.3 score(fREML)=1101794 conc=1.000 | disp.p=0 zero.p=0 moranI=0.008(p=0) box.p=3.83e-06 
+
+Concurvity (full=FALSE) -- RAW air_temp model: 
+                           para s(month) s(time_index) te(centroid_x,centroid_y) s(ice_conc) s(air_temp)
+para                      1.000    0.001         0.000                     0.002       0.660       0.171
+s(month)                  0.008    1.000         0.007                     0.000       0.028       0.211
+s(time_index)             0.002    0.047         1.000                     0.000       0.006       0.021
+te(centroid_x,centroid_y) 1.000    0.315         0.463                     1.000       0.776       0.323
+s(ice_conc)               0.888    0.017         0.002                     0.003       1.000       0.247
+s(air_temp)               0.965    0.154         0.007                     0.004       0.815       1.000
+
+Concurvity (full=FALSE) -- air_temp_resid model: 
+                           para s(month) s(time_index) te(centroid_x,centroid_y) s(ice_conc) s(air_temp_resid)
+para                      1.000    0.000         0.000                     0.001       0.660             0.227
+s(month)                  0.005    1.000         0.007                     0.000       0.030             0.229
+s(time_index)             0.003    0.047         1.000                     0.000       0.005             0.031
+te(centroid_x,centroid_y) 1.000    0.332         0.352                     1.000       0.776             0.352
+s(ice_conc)               0.888    0.017         0.001                     0.003       1.000             0.214
+s(air_temp_resid)         0.986    0.130         0.005                     0.002       0.675             1.000
+
+>>> M3_wind :  nOprD_CO ~ s(month, bs = "cc", k = 12) + s(time_index, bs = "ps", m = c(2, 2), k = 10) + te(centroid_x, centroid_y, bs = "ps", k = c(20, 20)) + s(ice_conc, bs = "ps", m = c(2, 2), k = 20) + s(air_temp_resid, bs = "ps", m = c(2, 2), k = 20) + s(wind_speed, bs = "ps", m = c(2, 2), k = 20) 
+  [reusing cached fit: /Users/pabloperezgonzalez/Downloads/Statistical Modeling Project/On experiments/models/M3_wind.rds] 
+  [M3_wind] AIC=2197859 BIC=2202111 dev.expl=66.3% edf=381.0 score(fREML)=1101341 conc=1.000 | disp.p=0 zero.p=0 moranI=0.008(p=0) box.p=2.31e-06 
+
+>>> M4_port :  nOprD_CO ~ s(month, bs = "cc", k = 12) + s(time_index, bs = "ps", m = c(2, 2), k = 10) + te(centroid_x, centroid_y, bs = "ps", k = c(20, 20)) + s(ice_conc, bs = "ps", m = c(2, 2), k = 20) + s(air_temp_resid, bs = "ps", m = c(2, 2), k = 20) + s(wind_speed, bs = "ps", m = c(2, 2), k = 20) + s(port_dist, bs = "ps", m = c(2, 2), k = 20) 
+  [reusing cached fit: /Users/pabloperezgonzalez/Downloads/Statistical Modeling Project/On experiments/models/M4_port.rds] 
+  [M4_port] AIC=2189424 BIC=2193878 dev.expl=67.0% edf=399.3 score(fREML)=1097156 conc=1.000 | disp.p=0 zero.p=0 moranI=0.009(p=0) box.p=3.73e-06 
+
+>>> M5_post2017 :  nOprD_CO ~ s(month, bs = "cc", k = 12) + s(time_index, bs = "ps", m = c(2, 2), k = 10) + te(centroid_x, centroid_y, bs = "ps", k = c(20, 20)) + s(ice_conc, bs = "ps", m = c(2, 2), k = 20) + s(air_temp_resid, bs = "ps", m = c(2, 2), k = 20) + s(wind_speed, bs = "ps", m = c(2, 2), k = 20) + s(port_dist, bs = "ps", m = c(2, 2), k = 20) + post2017 
+  [reusing cached fit: /Users/pabloperezgonzalez/Downloads/Statistical Modeling Project/On experiments/models/M5_post2017.rds] 
+  [M5_post2017] AIC=2189387 BIC=2193852 dev.expl=67.0% edf=400.3 score(fREML)=1097141 conc=1.000 | disp.p=0 zero.p=0 moranI=0.009(p=0) box.p=5.7e-07 
+
+01_buildup_tweedie DONE. Frozen spatial = te(centroid_x,centroid_y) 
+
+==============================================================================
+## 00_setup :: load analytic dataset (READ-ONLY) and derive responses
+==============================================================================
+Loaded /Users/pabloperezgonzalez/Downloads/Statistical Modeling Project/On Data/Data/analytic_dataset_built.rds 
+raw dim: 461448 rows x 27 cols 
+
+Observation summary 
+  rows (hex-months)        : 461,448 
+  unique hexes             : 6,409 
+  unique months (dates)    : 72 
+  time span                : 2015-01-01 .. 2020-12-01 
+  time_index range         : 1 .. 72 
+  nOprD_CO  zero-proportion : 0.4331   mean 10.52   var/mean 107.0   max 807 
+  nMMSI_CO  zero-proportion : 0.4331   mean 8.22   var/mean 87.8   max 509 
+  post2017 table           : pre=153816 post=307632 
+
+==============================================================================
+## 00_setup :: session info
+==============================================================================
+R           : R version 4.5.3 (2026-03-11) 
+platform    : aarch64-apple-darwin20 
+mgcv        : 1.9.4 
+DHARMa      : 0.4.7 
+gratia      : 0.11.2 
+ape         : 5.8.1 
+nthreads    : 10 
+twlss avail : TRUE 
+ziplss avail: TRUE 
+00_setup ready.
+ 
+
+==============================================================================
+## 02_distribution_comparison :: tw vs nb vs gaussian at the final predictor
+==============================================================================
+Frozen spatial term : te(centroid_x, centroid_y, bs = "ps", k = c(20, 20)) 
+Final mean predictor: nOprD_CO ~ s(month, bs = "cc", k = 12) + s(time_index, bs = "ps", m = c(2, 2), k = 10) + te(centroid_x, centroid_y, bs = "ps", k = c(20, 20)) + s(ice_conc, bs = "ps", m = c(2, 2), k = 20) + s(air_temp_resid, bs = "ps", m = c(2, 2), k = 20) + s(wind_speed, bs = "ps", m = c(2, 2), k = 20) + s(port_dist, bs = "ps", m = c(2, 2), k = 20) + post2017 
+
+>>> D_tw : family = tw() 
+  [reusing cached fit] 
+  [D_tw] AIC=2189387 BIC=2193852 dev.expl=67.0% edf=400.3 score(fREML)=1097141 conc=1.000 | disp.p=0 zero.p=0 moranI=0.009(p=0) box.p=5.7e-07 
+
+>>> D_nb : family = nb() 
+  [reusing cached fit] 
+  [D_nb] AIC=2048217 BIC=2052634 dev.expl=65.9% edf=395.2 score(fREML)=1026360 conc=1.000 | disp.p=0 zero.p=0 moranI=0.014(p=0) box.p=0.0183 
+
+>>> D_gaussian : family = gaussian() 
+  [reusing cached fit] 
+  [D_gaussian] AIC=4318174 BIC=4322513 dev.expl=39.8% edf=388.1 score(fREML)=2161355 conc=1.000 | disp.p=0 zero.p=0 moranI=0.002(p=0.000693) box.p=0.0221 
+
+==============================================================================
+## DISTRIBUTION COMPARISON -- verdict
+==============================================================================
+tw()       : AIC=     2189387  BIC=     2193852  dev.expl= 67.0%  disp.p=0        zero.p=0        
+nb()       : AIC=     2048217  BIC=     2052634  dev.expl= 65.9%  disp.p=0        zero.p=0        
+gaussian() : AIC=     4318174  BIC=     4322513  dev.expl= 39.8%  disp.p=0        zero.p=0        
+
+RECOMMENDED working distribution (tw vs nb, by AIC + DHARMa): NB 
+
+02_distribution_comparison DONE. Recommended: NB 
+
+==============================================================================
+## 00_setup :: load analytic dataset (READ-ONLY) and derive responses
+==============================================================================
+Loaded /Users/pabloperezgonzalez/Downloads/Statistical Modeling Project/On Data/Data/analytic_dataset_built.rds 
+raw dim: 461448 rows x 27 cols 
+
+Observation summary 
+  rows (hex-months)        : 461,448 
+  unique hexes             : 6,409 
+  unique months (dates)    : 72 
+  time span                : 2015-01-01 .. 2020-12-01 
+  time_index range         : 1 .. 72 
+  nOprD_CO  zero-proportion : 0.4331   mean 10.52   var/mean 107.0   max 807 
+  nMMSI_CO  zero-proportion : 0.4331   mean 8.22   var/mean 87.8   max 509 
+  post2017 table           : pre=153816 post=307632 
+
+==============================================================================
+## 00_setup :: session info
+==============================================================================
+R           : R version 4.5.3 (2026-03-11) 
+platform    : aarch64-apple-darwin20 
+mgcv        : 1.9.4 
+DHARMa      : 0.4.7 
+gratia      : 0.11.2 
+ape         : 5.8.1 
+nthreads    : 10 
+twlss avail : TRUE 
+ziplss avail: TRUE 
+00_setup ready.
+ 
+
+==============================================================================
+## 03_dispersion_twlss :: Tweedie location-scale (does dispersion depend on ice?)
+==============================================================================
+
+==============================================================================
+## twlss fit (method = efs) with spatial fallback chain
+==============================================================================
+[reusing cached twlss fit: /Users/pabloperezgonzalez/Downloads/Statistical Modeling Project/On experiments/models/S_twlss_scale_ice.rds] 
+twlss fitted: spatial=te12x12  converged=FALSE  runtime=0.0s 
+Estimated Tweedie power p (twlss, constant): 1.8026 
+  [S_twlss_scale_ice] AIC=2200619 BIC=2203189 dev.expl=55.0% edf=232.8 score(efs)=1101365 conc=1.000 | disp.p=NA zero.p=NA moranI=0.018(p=0) box.p=0.0459 
+
+==============================================================================
+## scale-smooth interpretation (lp2 = log-scale vs ice)
+==============================================================================
+Saved scale-vs-ice plot. 
+
+03_dispersion_twlss DONE. p=1.803 spatial=te12x12 
+
+==============================================================================
+## 00_setup :: load analytic dataset (READ-ONLY) and derive responses
+==============================================================================
+Loaded /Users/pabloperezgonzalez/Downloads/Statistical Modeling Project/On Data/Data/analytic_dataset_built.rds 
+raw dim: 461448 rows x 27 cols 
+
+Observation summary 
+  rows (hex-months)        : 461,448 
+  unique hexes             : 6,409 
+  unique months (dates)    : 72 
+  time span                : 2015-01-01 .. 2020-12-01 
+  time_index range         : 1 .. 72 
+  nOprD_CO  zero-proportion : 0.4331   mean 10.52   var/mean 107.0   max 807 
+  nMMSI_CO  zero-proportion : 0.4331   mean 8.22   var/mean 87.8   max 509 
+  post2017 table           : pre=153816 post=307632 
+
+==============================================================================
+## 00_setup :: session info
+==============================================================================
+R           : R version 4.5.3 (2026-03-11) 
+platform    : aarch64-apple-darwin20 
+mgcv        : 1.9.4 
+DHARMa      : 0.4.7 
+gratia      : 0.11.2 
+ape         : 5.8.1 
+nthreads    : 10 
+twlss avail : TRUE 
+ziplss avail: TRUE 
+00_setup ready.
+ 
+
+==============================================================================
+## FINALIZE :: 02 notes + ziplss-failed record + md reorder + plots manifest
+==============================================================================
+02 notes already present (written by 02) -- skipping to avoid duplicates. 
+Recorded Z_ziplss FAILED row + 04 note. 
+Reordered md (12 sections). 
+Wrote plots_manifest.md (49 figures). 
+FINALIZE DONE. 
+[CLEAN RUN COMPLETE 22:23:22]

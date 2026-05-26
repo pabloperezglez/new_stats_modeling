@@ -1,0 +1,21 @@
+# =====================================================================
+# Excluded from the repository (see README) — keep the repo lean & lawful
+# =====================================================================
+
+# --- Large fitted GAM models (2.5 GB; M0a alone is ~2 GB, over GitHub's 100 MB limit).
+#     Regenerate by running On experiments/01-04 against the analytic dataset. ---
+On experiments/models/
+On experiments/frozen_spatial.rds
+
+# --- Raw / analytic DATA: READ-ONLY third-party inputs (NSIDC sea-ice, ERA5,
+#     Kapsar et al. shipping). License-restricted and large; NOT redistributed here. ---
+On Data/Data/
+
+# --- OS / editor / R session cruft ---
+.DS_Store
+**/.DS_Store
+.Rhistory
+.RData
+.Rproj.user/
+*_cache/
+.Renviron
